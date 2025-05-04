@@ -10,10 +10,14 @@ load_dotenv('.env.local')
 def get_db_connection():
     """Create a database connection using environment variables"""
     try:
-        host = os.environ.get('MYSQL_HOST', 'localhost')
-        user = os.environ.get('MYSQL_USER', 'root')
-        password = os.environ.get('MYSQL_PASSWORD', '')
-        database = os.environ.get('MYSQL_DATABASE', 'ocr_app')
+        host = os.environ.get('MYSQL_HOST')
+        user = os.environ.get('MYSQL_USER')
+        password = os.environ.get('MYSQL_PASSWORD')
+        database = os.environ.get('MYSQL_DATABASE')
+        
+        if not all([host, user, password, database]):
+            print("Error: Missing required database credentials in environment variables")
+            return None
         
         print(f"Connecting to MySQL: host={host}, user={user}, database={database}")
         
@@ -40,7 +44,11 @@ def create_database_and_tables():
         cursor = connection.cursor()
         
         # Create database if it doesn't exist
-        db_name = os.environ.get('MYSQL_DATABASE', 'ocr_app')
+        db_name = os.environ.get('MYSQL_DATABASE')
+        if not db_name:
+            print("Error: MYSQL_DATABASE environment variable is not set")
+            return False
+            
         print(f"Creating database {db_name} if it doesn't exist")
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
         
@@ -57,7 +65,7 @@ def create_database_and_tables():
                 image_path VARCHAR(255) NOT NULL,
                 extracted_text TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at DATETIME DEFAULT NULL
             )
         ''')
         
@@ -81,11 +89,10 @@ def create_database_and_tables():
         return False
 
 if __name__ == "__main__":
-    print("Starting database check and setup...")
-    result = create_database_and_tables()
-    
-    if result:
-        print("Database and tables set up successfully!")
-    else:
+    print("\nStarting database check and setup...")
+    success = create_database_and_tables()
+    if not success:
         print("Failed to set up database and tables")
-        sys.exit(1) 
+        sys.exit(1)
+    print("Database setup completed successfully!")
+    sys.exit(0) 

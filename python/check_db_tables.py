@@ -12,10 +12,14 @@ load_dotenv('.env.local')
 def get_db_connection():
     """Create a database connection using environment variables"""
     try:
-        host = os.environ.get('MYSQL_HOST', 'localhost')
-        user = os.environ.get('MYSQL_USER', 'root')
-        password = os.environ.get('MYSQL_PASSWORD', 'MYSQL_PASSWORD')
-        database = os.environ.get('MYSQL_DATABASE', 'ocr_app')
+        host = os.environ.get('MYSQL_HOST')
+        user = os.environ.get('MYSQL_USER')
+        password = os.environ.get('MYSQL_PASSWORD')
+        database = os.environ.get('MYSQL_DATABASE')
+        
+        if not all([host, user, password, database]):
+            print("Error: Missing required database credentials in environment variables")
+            return None
         
         print(f"Connecting to MySQL: host={host}, user={user}, database={database}")
         

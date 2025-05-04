@@ -11,7 +11,7 @@ def get_db_connection():
         connection = mysql.connector.connect(
             host=os.environ.get('MYSQL_HOST', 'localhost'),
             user=os.environ.get('MYSQL_USER', 'root'),
-            password=os.environ.get('MYSQL_PASSWORD', 'MYSQL_PASSWORD'),
+            password=os.environ.get('MYSQL_PASSWORD', '123456'),
             database=os.environ.get('MYSQL_DATABASE', 'ocr_app')
         )
         return connection
