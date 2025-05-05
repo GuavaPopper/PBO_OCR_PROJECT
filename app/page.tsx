@@ -70,16 +70,16 @@ export default async function Home({
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">OCR Image Processing</h1>
+        <h1 className="text-3xl font-bold">Pemrosesan Gambar OCR</h1>
         <div className="flex gap-2">
           <Link href="/" className="flex items-center gap-1">
             <Button variant="outline" size="sm">
               <RefreshCw className="h-4 w-4 mr-1" />
-              Refresh
+              Segarkan
             </Button>
           </Link>
           <Link href="/add">
-            <Button size="sm">Add Image</Button>
+            <Button size="sm">Tambah Gambar</Button>
           </Link>
         </div>
       </div>
@@ -118,7 +118,7 @@ async function HomeContent({
       <div className="md:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle>Image Database</CardTitle>
+            <CardTitle>Database Gambar</CardTitle>
           </CardHeader>
           <CardContent>
             <ClientImageList initialImages={images} />

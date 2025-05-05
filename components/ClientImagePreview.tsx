@@ -96,19 +96,19 @@ export default function ClientImagePreview({ searchParams, images }: { searchPar
       <>
         <Card>
           <CardHeader>
-            <CardTitle>Image Preview</CardTitle>
+            <CardTitle>Pratinjau Gambar</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-center h-64 text-muted-foreground">
-            Select an image to preview
+            Pilih gambar untuk melihat pratinjau
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Extracted Text</CardTitle>
+            <CardTitle>Teks Hasil Ekstraksi</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="min-h-[300px] flex items-center justify-center text-muted-foreground">
-              No text to display
+              Tidak ada teks untuk ditampilkan
             </div>
           </CardContent>
         </Card>
@@ -130,7 +130,7 @@ export default function ClientImagePreview({ searchParams, images }: { searchPar
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Image Preview: {selectedImage.name}</CardTitle>
+          <CardTitle>Pratinjau Gambar: {selectedImage.name}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="relative h-64 w-full flex items-center justify-center">
@@ -151,13 +151,13 @@ export default function ClientImagePreview({ searchParams, images }: { searchPar
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-2">
-            <CardTitle>Extracted Text</CardTitle>
+            <CardTitle>Teks Hasil Ekstraksi</CardTitle>
             {selectedImage?.extracted_text && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => downloadText(selectedImage.name, selectedImage.extracted_text)}
-                title="Download text"
+                title="Unduh teks"
               >
                 <DownloadIcon className="h-4 w-4" />
               </Button>
@@ -166,7 +166,7 @@ export default function ClientImagePreview({ searchParams, images }: { searchPar
         </CardHeader>
         <CardContent>
           <div className="max-h-[calc(100vh-500px)] min-h-[300px] overflow-auto">
-            {selectedImage.extracted_text || "No text was extracted from this image"}
+            {selectedImage.extracted_text || "Tidak ada teks yang diekstrak dari gambar ini"}
           </div>
         </CardContent>
       </Card>

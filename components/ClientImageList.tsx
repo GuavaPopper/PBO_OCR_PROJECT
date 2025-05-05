@@ -89,7 +89,7 @@ export default function ClientImageList({ initialImages }: { initialImages: any[
   if (!images || images.length === 0) {
     return (
       <div className="text-center py-6 text-muted-foreground">
-        No images have been uploaded yet
+        Belum ada gambar yang diunggah
       </div>
     );
   }
@@ -101,13 +101,13 @@ export default function ClientImageList({ initialImages }: { initialImages: any[
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search images by name or content..."
+            placeholder="Cari gambar berdasarkan nama atau konten..."
             className="pl-8 w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button type="submit" size="sm" variant="secondary">Search</Button>
+        <Button type="submit" size="sm" variant="secondary">Cari</Button>
       </form>
       
       <div className="overflow-x-auto">
@@ -116,10 +116,10 @@ export default function ClientImageList({ initialImages }: { initialImages: any[
             <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
                 <TableHead className="w-[60px]">No</TableHead>
-                <TableHead className="w-[200px]">Image Name</TableHead>
-                <TableHead className="w-[200px]">File Location</TableHead>
-                <TableHead>Text Preview</TableHead>
-                <TableHead className="w-[120px]">Date Added</TableHead>
+                <TableHead className="w-[200px]">Nama Gambar</TableHead>
+                <TableHead className="w-[200px]">Lokasi File</TableHead>
+                <TableHead>Pratinjau Teks</TableHead>
+                <TableHead className="w-[120px]">Tanggal Ditambahkan</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -137,10 +137,10 @@ export default function ClientImageList({ initialImages }: { initialImages: any[
                   >
                     {image.image_path}
                   </TableCell>
-                  <TableCell className="max-w-[300px] truncate" title={image.extracted_text || "No text extracted"}>
+                  <TableCell className="max-w-[300px] truncate" title={image.extracted_text || "Tidak ada teks yang diekstrak"}>
                     {image.extracted_text
                       ? `${image.extracted_text.substring(0, 50)}${image.extracted_text.length > 50 ? "..." : ""}`
-                      : "No text extracted"}
+                      : "Tidak ada teks yang diekstrak"}
                   </TableCell>
                   <TableCell>{formatDate(image.created_at)}</TableCell>
                 </TableRow>
@@ -152,7 +152,7 @@ export default function ClientImageList({ initialImages }: { initialImages: any[
       
       {filteredImages.length === 0 && searchTerm && (
         <div className="text-center py-4 text-muted-foreground">
-          No images found matching "{searchTerm}"
+          Tidak ditemukan gambar yang cocok dengan "{searchTerm}"
         </div>
       )}
     </div>

@@ -142,8 +142,8 @@ export default function BatchPage() {
     const errorCount = files.filter((f) => f.status === "error").length
 
     toast({
-      title: "Batch Processing Complete",
-      description: `Successfully processed ${successCount} of ${totalFiles} images. ${errorCount} failed.`,
+      title: "Pemrosesan Batch Selesai",
+      description: `Berhasil memproses ${successCount} dari ${totalFiles} gambar. ${errorCount} gagal.`,
       variant: successCount === totalFiles ? "default" : "destructive",
     })
   }
@@ -159,16 +159,16 @@ export default function BatchPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Batch Image Processing</h1>
+      <h1 className="text-3xl font-bold mb-6">Pemrosesan Gambar Massal</h1>
 
       <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Upload Multiple Images</CardTitle>
+            <CardTitle>Unggah Beberapa Gambar</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="file-upload">Select Images</Label>
+              <Label htmlFor="file-upload">Pilih Gambar</Label>
               <div className="flex items-center gap-2">
                 <Input
                   id="file-upload"
@@ -187,7 +187,7 @@ export default function BatchPage() {
                   disabled={isProcessing}
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  Select Images
+                  Pilih Gambar
                 </Button>
               </div>
             </div>
@@ -195,7 +195,7 @@ export default function BatchPage() {
             {files.length > 0 && (
               <div className="space-y-4">
                 <div className="text-sm font-medium">
-                  {files.length} file{files.length !== 1 ? "s" : ""} selected
+                  {files.length} file{files.length !== 1 ? "" : ""} dipilih
                 </div>
 
                 <div className="border rounded-md divide-y">
@@ -206,10 +206,10 @@ export default function BatchPage() {
                         <div className="text-sm">
                           <div className="font-medium">{file.name}</div>
                           <div className="text-xs text-muted-foreground">
-                            {file.status === "pending" && "Pending"}
-                            {file.status === "processing" && "Processing..."}
-                            {file.status === "success" && "Processed successfully"}
-                            {file.status === "error" && `Error: ${file.error || "Processing failed"}`}
+                            {file.status === "pending" && "Menunggu"}
+                            {file.status === "processing" && "Memproses..."}
+                            {file.status === "success" && "Berhasil diproses"}
+                            {file.status === "error" && `Kesalahan: ${file.error || "Gagal memproses"}`}
                           </div>
                         </div>
                       </div>
@@ -228,7 +228,7 @@ export default function BatchPage() {
                 {isProcessing && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Progress</span>
+                      <span>Progres</span>
                       <span>{progress}%</span>
                     </div>
                     <Progress value={progress} />
@@ -239,16 +239,16 @@ export default function BatchPage() {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button variant="outline" onClick={() => router.push("/")} disabled={isProcessing}>
-              Cancel
+              Batal
             </Button>
             <Button onClick={processFiles} disabled={files.length === 0 || isProcessing}>
               {isProcessing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
+                  Memproses...
                 </>
               ) : (
-                "Process All Images"
+                "Mulai Proses"
               )}
             </Button>
           </CardFooter>

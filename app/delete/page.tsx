@@ -72,8 +72,8 @@ export default function DeletePage() {
       } catch (error) {
         console.error("Error fetching images:", error)
         toast({
-          title: "Error",
-          description: "Failed to load images.",
+          title: "Kesalahan",
+          description: "Gagal memuat gambar.",
           variant: "destructive",
         })
         setIsLoading(false)
@@ -136,8 +136,8 @@ export default function DeletePage() {
     } catch (error) {
       console.error("[Client] Error loading image details:", error)
       toast({
-        title: "Error",
-        description: "Failed to load image details. Please try refreshing the page.",
+        title: "Kesalahan",
+        description: "Gagal memuat detail gambar. Silakan segarkan halaman.",
         variant: "destructive",
       })
       setIsLoading(false)
@@ -210,8 +210,8 @@ export default function DeletePage() {
       }
 
       toast({
-        title: "Image Deleted",
-        description: "The image has been successfully deleted.",
+        title: "Gambar Dihapus",
+        description: "Gambar telah berhasil dihapus.",
       })
 
       // Redirect to home page
@@ -220,8 +220,8 @@ export default function DeletePage() {
     } catch (error) {
       console.error("[Client] Error deleting image:", error)
       toast({
-        title: "Delete Failed",
-        description: "There was an error deleting the image. Please try again.",
+        title: "Penghapusan Gagal",
+        description: "Terjadi kesalahan saat menghapus gambar. Silakan coba lagi.",
         variant: "destructive",
       })
     } finally {
@@ -231,19 +231,19 @@ export default function DeletePage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Delete Image</h1>
+      <h1 className="text-3xl font-bold mb-6">Hapus Gambar</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Image Selection</CardTitle>
+            <CardTitle>Pilih Gambar</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="image-select">Select Image to Delete</Label>
+              <Label htmlFor="image-select">Pilih Gambar untuk Dihapus</Label>
               <Select value={selectedImageId} onValueChange={handleImageSelect} disabled={isLoading}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select an image to delete" />
+                  <SelectValue placeholder="Pilih gambar untuk dihapus" />
                 </SelectTrigger>
                 <SelectContent>
                   {images.map((image) => (
@@ -254,61 +254,60 @@ export default function DeletePage() {
                 </SelectContent>
               </Select>
             </div>
-          </CardContent>
-          <CardFooter>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full" disabled={isDeleting || isLoading || !selectedImageId}>
-                  {isDeleting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Image
-                    </>
-                  )}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the image and all associated data from
-                    the database.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+
+            {selectedImageId && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    disabled={isDeleting || !selectedImageId}
                   >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardFooter>
+                    {isDeleting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Menghapus...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Hapus Gambar
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Apakah Anda yakin ingin menghapus gambar ini? Tindakan ini tidak dapat dibatalkan.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>Hapus</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </CardContent>
         </Card>
 
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Image Preview</CardTitle>
+              <CardTitle>Pratinjau Gambar</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="flex items-center justify-center h-48">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : selectedImage ? (
                 <div className="relative h-48 w-full">
                   <img
                     src={formatImagePath(selectedImage.image_path)}
-                    alt={selectedImage.name}
+                    alt="Pratinjau"
                     className="object-contain w-full h-full"
                     onError={(e) => {
                       console.error("Image failed to load:", e);
@@ -318,7 +317,7 @@ export default function DeletePage() {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-md text-muted-foreground">
-                  No image selected
+                  Belum ada gambar dipilih
                 </div>
               )}
             </CardContent>
@@ -326,28 +325,17 @@ export default function DeletePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Image Details</CardTitle>
+              <CardTitle>Teks Hasil Ekstraksi</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="flex items-center justify-center h-32">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : selectedImage ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium">Name</h3>
-                    <p>{selectedImage.name}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium">Extracted Text</h3>
-                    <p className="max-h-32 overflow-y-auto text-sm">
-                      {selectedImage.extracted_text || "No text was extracted from this image"}
-                    </p>
-                  </div>
+                  <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
               ) : (
-                <div className="text-center py-6 text-muted-foreground">Select an image to view details</div>
+                <div className="min-h-[200px] max-h-[calc(100vh-500px)] overflow-auto">
+                  {selectedImage?.extracted_text || "Tidak ada teks yang diekstrak"}
+                </div>
               )}
             </CardContent>
           </Card>

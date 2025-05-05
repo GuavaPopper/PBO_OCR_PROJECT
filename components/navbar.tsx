@@ -12,23 +12,23 @@ export default function Navbar() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center space-x-4">
           <Link href="/" className="text-xl font-bold">
-            OCR App
+            Aplikasi OCR
           </Link>
           <div className="hidden md:flex space-x-2">
             <Button variant={pathname === "/" ? "default" : "ghost"} asChild size="sm">
-              <Link href="/">Home</Link>
+              <Link href="/">Beranda</Link>
             </Button>
             <Button variant={pathname === "/add" ? "default" : "ghost"} asChild size="sm">
-              <Link href="/add">Add</Link>
+              <Link href="/add">Tambah</Link>
             </Button>
             <Button variant={pathname === "/edit" ? "default" : "ghost"} asChild size="sm">
-              <Link href="/edit">Edit</Link>
+              <Link href="/edit">Ubah</Link>
             </Button>
             <Button variant={pathname === "/delete" ? "default" : "ghost"} asChild size="sm">
-              <Link href="/delete">Delete</Link>
+              <Link href="/delete">Hapus</Link>
             </Button>
             <Button variant={pathname === "/batch" ? "default" : "ghost"} asChild size="sm">
-              <Link href="/batch">Batch</Link>
+              <Link href="/batch">Proses Massal</Link>
             </Button>
           </div>
         </div>

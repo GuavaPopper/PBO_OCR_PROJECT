@@ -12,7 +12,6 @@ import { Upload, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AddPage() {
   const [imageName, setImageName] = useState("")
@@ -24,7 +23,6 @@ export default function AddPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { toast } = useToast()
-  const [selectedLanguage, setSelectedLanguage] = useState("eng") // Default to English
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -55,8 +53,7 @@ export default function AddPage() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              image: imageData,
-              language: selectedLanguage,
+              image: imageData
             }),
           })
 
@@ -69,8 +66,8 @@ export default function AddPage() {
         } catch (error) {
           console.error("Error processing image:", error)
           toast({
-            title: "OCR Processing Failed",
-            description: "There was an error extracting text from the image.",
+            title: "Pemrosesan OCR Gagal",
+            description: "Terjadi kesalahan saat mengekstrak teks dari gambar.",
             variant: "destructive",
           })
         } finally {
@@ -86,8 +83,8 @@ export default function AddPage() {
 
     if (!imagePreview) {
       toast({
-        title: "Missing Image",
-        description: "Please upload an image.",
+        title: "Gambar Tidak Ditemukan",
+        description: "Silakan unggah sebuah gambar.",
         variant: "destructive",
       })
       return
@@ -116,8 +113,8 @@ export default function AddPage() {
       }
 
       toast({
-        title: "Image Saved",
-        description: "The image has been successfully processed and saved.",
+        title: "Gambar Tersimpan",
+        description: "Gambar telah berhasil diproses dan disimpan.",
       })
 
       // Redirect to home page
@@ -126,8 +123,8 @@ export default function AddPage() {
     } catch (error) {
       console.error("Error saving image:", error)
       toast({
-        title: "Save Failed",
-        description: "There was an error saving the image.",
+        title: "Penyimpanan Gagal",
+        description: "Terjadi kesalahan saat menyimpan gambar.",
         variant: "destructive",
       })
     } finally {
@@ -137,50 +134,27 @@ export default function AddPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Add New Image</h1>
+      <h1 className="text-3xl font-bold mb-6">Tambah Gambar Baru</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Image Information</CardTitle>
+              <CardTitle>Informasi Gambar</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="image-name">Image Name (Optional)</Label>
+                <Label htmlFor="image-name">Nama Gambar (Opsional)</Label>
                 <Input
                   id="image-name"
                   value={imageName}
                   onChange={(e) => setImageName(e.target.value)}
-                  placeholder={originalFileName || "Enter a name for this image (or leave blank to use file name)"}
+                  placeholder={originalFileName || "Masukkan nama untuk gambar ini (atau biarkan kosong untuk menggunakan nama file)"}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ocr-language">OCR Language</Label>
-                <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                  <SelectTrigger id="ocr-language">
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="eng">English</SelectItem>
-                    <SelectItem value="fra">French</SelectItem>
-                    <SelectItem value="deu">German</SelectItem>
-                    <SelectItem value="spa">Spanish</SelectItem>
-                    <SelectItem value="ita">Italian</SelectItem>
-                    <SelectItem value="por">Portuguese</SelectItem>
-                    <SelectItem value="rus">Russian</SelectItem>
-                    <SelectItem value="jpn">Japanese</SelectItem>
-                    <SelectItem value="chi_sim">Chinese (Simplified)</SelectItem>
-                    <SelectItem value="chi_tra">Chinese (Traditional)</SelectItem>
-                    <SelectItem value="kor">Korean</SelectItem>
-                    <SelectItem value="ara">Arabic</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="image-upload">Upload Image</Label>
+                <Label htmlFor="image-upload">Unggah Gambar</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="image-upload"
@@ -197,7 +171,7 @@ export default function AddPage() {
                     className="w-full"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    Select Image
+                    Pilih Gambar
                   </Button>
                 </div>
               </div>
@@ -207,10 +181,10 @@ export default function AddPage() {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
+                    Menyimpan...
                   </>
                 ) : (
-                  "Save Image"
+                  "Simpan Gambar"
                 )}
               </Button>
             </CardFooter>
@@ -219,14 +193,14 @@ export default function AddPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Image Preview</CardTitle>
+                <CardTitle>Pratinjau Gambar</CardTitle>
               </CardHeader>
               <CardContent>
                 {imagePreview ? (
                   <div className="relative h-48 w-full">
                     <img 
                       src={imagePreview || "/placeholder.jpg"} 
-                      alt="Preview" 
+                      alt="Pratinjau" 
                       className="object-contain w-full h-full" 
                       onError={(e) => {
                         console.error("Image failed to load:", e);
@@ -236,7 +210,7 @@ export default function AddPage() {
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-md text-muted-foreground">
-                    No image selected
+                    Belum ada gambar dipilih
                   </div>
                 )}
               </CardContent>
@@ -244,20 +218,20 @@ export default function AddPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Extracted Text</CardTitle>
+                <CardTitle>Teks Hasil Ekstraksi</CardTitle>
               </CardHeader>
               <CardContent>
                 {isProcessing ? (
                   <div className="flex items-center justify-center h-32">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <span className="ml-2">Processing image...</span>
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span className="ml-2">Memproses gambar...</span>
                   </div>
                 ) : (
                   <Textarea
                     value={extractedText}
                     onChange={(e) => setExtractedText(e.target.value)}
-                    placeholder="Extracted text will appear here"
-                    className="min-h-[120px]"
+                    placeholder="Teks yang diekstrak akan muncul di sini"
+                    className="min-h-[200px]"
                   />
                 )}
               </CardContent>

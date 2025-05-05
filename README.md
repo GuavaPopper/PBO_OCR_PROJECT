@@ -36,21 +36,13 @@ npm install -g pnpm
 pnpm install
 ```
 
-4. Buat dan aktifkan virtual environment Python:
-```bash
-python -m venv venv
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-```
 
-5. Install dependensi Python:
+4. Install dependensi Python:
 ```bash
 pip install -r requirements.txt
 ```
 
-6. Install Tesseract OCR:
+5. Install Tesseract OCR:
 - Windows: Download installer dari [GitHub](https://github.com/UB-Mannheim/tesseract/wiki)
 - Linux: `sudo apt install tesseract-ocr`
 - Mac: `brew install tesseract`
@@ -87,12 +79,7 @@ source venv/bin/activate
 pnpm dev
 ```
 
-3. Di terminal terpisah, jalankan server Python:
-```bash
-python python/server.py
-```
-
-4. Buka browser dan akses `http://localhost:3000`
+3. Buka browser dan akses `http://localhost:3000`
 
 ## Penggunaan
 

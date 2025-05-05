@@ -19,6 +19,7 @@ interface ImageType {
   name: string
   image_path: string
   extracted_text: string
+  created_at: string
 }
 
 // Utility function to ensure image paths are correctly formatted
@@ -38,6 +39,8 @@ export default function EditPage() {
   const [images, setImages] = useState<ImageType[]>([])
   const [selectedImageId, setSelectedImageId] = useState<string>("")
   const [imageName, setImageName] = useState("")
+  const [imageLocation, setImageLocation] = useState("")
+  const [imageDate, setImageDate] = useState("")
   const [currentImagePath, setCurrentImagePath] = useState("")
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [extractedText, setExtractedText] = useState("")
@@ -70,8 +73,8 @@ export default function EditPage() {
       } catch (error) {
         console.error("Error fetching images:", error)
         toast({
-          title: "Error",
-          description: "Failed to load images.",
+          title: "Kesalahan",
+          description: "Gagal memuat gambar.",
           variant: "destructive",
         })
         setIsLoading(false)
@@ -105,6 +108,8 @@ export default function EditPage() {
             if (foundImage) {
               console.log(`[Client] Found image in MySQL data: ${foundImage.name}`)
               setImageName(foundImage.name)
+              setImageLocation(foundImage.image_path)
+              setImageDate(foundImage.created_at ? foundImage.created_at.split('T')[0] : '')
               setCurrentImagePath(foundImage.image_path)
               setExtractedText(foundImage.extracted_text || "")
               setImagePreview(null)
@@ -133,15 +138,17 @@ export default function EditPage() {
       const image = await response.json()
       console.log(`[Client] Successfully loaded image: ${image.name}`)
       setImageName(image.name)
+      setImageLocation(image.image_path)
+      setImageDate(image.created_at ? image.created_at.split('T')[0] : '')
       setCurrentImagePath(image.image_path)
       setExtractedText(image.extracted_text || "")
-      setImagePreview(null) // Reset image preview for new upload
+      setImagePreview(null)
       setIsLoading(false)
     } catch (error) {
       console.error("[Client] Error loading image details:", error)
       toast({
-        title: "Error",
-        description: "Failed to load image details. Please try refreshing the page.",
+        title: "Kesalahan",
+        description: "Gagal memuat detail gambar. Silakan segarkan halaman.",
         variant: "destructive",
       })
       setIsLoading(false)
@@ -190,8 +197,8 @@ export default function EditPage() {
         } catch (error) {
           console.error("Error processing image:", error)
           toast({
-            title: "OCR Processing Failed",
-            description: "There was an error extracting text from the image.",
+            title: "Pemrosesan OCR Gagal",
+            description: "Terjadi kesalahan saat mengekstrak teks dari gambar.",
             variant: "destructive",
           })
         } finally {
@@ -207,8 +214,8 @@ export default function EditPage() {
 
     if (!selectedImageId || !imageName.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please select an image and provide a name.",
+        title: "Informasi Tidak Lengkap",
+        description: "Silakan pilih gambar dan berikan nama.",
         variant: "destructive",
       })
       return
@@ -230,6 +237,8 @@ export default function EditPage() {
           body: JSON.stringify({
             id: Number(selectedImageId),
             name: imageName,
+            image_path: imageLocation,
+            created_at: imageDate,
             extractedText: extractedText || ""
           }),
         })
@@ -303,8 +312,8 @@ export default function EditPage() {
       }
 
       toast({
-        title: "Image Updated",
-        description: "The image has been successfully updated.",
+        title: "Gambar Diperbarui",
+        description: "Gambar telah berhasil diperbarui.",
       })
 
       // Redirect to home page
@@ -313,8 +322,8 @@ export default function EditPage() {
     } catch (error) {
       console.error("[Client] Error updating image:", error)
       toast({
-        title: "Update Failed",
-        description: "There was an error updating the image. Please try again.",
+        title: "Pembaruan Gagal",
+        description: "Terjadi kesalahan saat memperbarui gambar. Silakan coba lagi.",
         variant: "destructive",
       })
     } finally {
@@ -324,20 +333,20 @@ export default function EditPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Edit Image</h1>
+      <h1 className="text-3xl font-bold mb-6">Ubah Gambar</h1>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Image Selection</CardTitle>
+              <CardTitle>Pilih Gambar</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="image-select">Select Image</Label>
-                <Select value={selectedImageId} onValueChange={handleImageSelect} disabled={isLoading}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an image to edit" />
+                <Label htmlFor="image-select">Gambar yang Tersedia</Label>
+                <Select value={selectedImageId} onValueChange={handleImageSelect}>
+                  <SelectTrigger id="image-select">
+                    <SelectValue placeholder="Pilih gambar untuk diubah" />
                   </SelectTrigger>
                   <SelectContent>
                     {images.map((image) => (
@@ -349,60 +358,68 @@ export default function EditPage() {
                 </Select>
               </div>
 
-              {selectedImageId && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="image-name">Image Name</Label>
-                    <Input
-                      id="image-name"
-                      value={imageName}
-                      onChange={(e) => setImageName(e.target.value)}
-                      placeholder="Enter a name for this image"
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="image-name">Nama File</Label>
+                <Input
+                  id="image-name"
+                  value={imageName}
+                  onChange={(e) => setImageName(e.target.value)}
+                  placeholder="Masukkan nama file"
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="image-upload">Upload New Image (Optional)</Label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="image-upload"
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        accept="image/*"
-                        className="hidden"
-                        disabled={isLoading}
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        variant="outline"
-                        className="w-full"
-                        disabled={isLoading}
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        Select New Image
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              )}
+              <div className="space-y-2">
+                <Label htmlFor="image-location">Lokasi File</Label>
+                <Input
+                  id="image-location"
+                  value={imageLocation}
+                  onChange={(e) => setImageLocation(e.target.value)}
+                  placeholder="Masukkan lokasi file"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image-date">Tanggal Input</Label>
+                <Input
+                  id="image-date"
+                  type="date"
+                  value={imageDate}
+                  onChange={(e) => setImageDate(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="image-upload">Unggah Gambar Baru (Opsional)</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="image-upload"
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Pilih Gambar Baru
+                  </Button>
+                </div>
+              </div>
             </CardContent>
             <CardFooter>
-              <Button
-                type="submit"
-                disabled={isSubmitting || isProcessing || isLoading || !selectedImageId}
-                className="w-full"
-              >
+              <Button type="submit" disabled={isSubmitting || isProcessing} className="w-full">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
+                    Menyimpan...
                   </>
                 ) : (
-                  "Update Image"
+                  "Simpan Perubahan"
                 )}
               </Button>
             </CardFooter>
@@ -411,34 +428,28 @@ export default function EditPage() {
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Image Preview</CardTitle>
+                <CardTitle>Pratinjau Gambar</CardTitle>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
                   <div className="flex items-center justify-center h-48">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <Loader2 className="h-8 w-8 animate-spin" />
                   </div>
-                ) : selectedImageId ? (
+                ) : imagePreview || currentImagePath ? (
                   <div className="relative h-48 w-full">
-                    {imagePreview || currentImagePath ? (
-                      <img 
-                        src={formatImagePath(imagePreview || currentImagePath)} 
-                        alt={imageName} 
-                        className="object-contain w-full h-full" 
-                        onError={(e) => {
-                          console.error("Image failed to load:", e);
-                          e.currentTarget.src = "/placeholder.jpg";
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full border-2 border-dashed rounded-md text-muted-foreground">
-                        No image available
-                      </div>
-                    )}
+                    <img
+                      src={imagePreview || formatImagePath(currentImagePath)}
+                      alt="Pratinjau"
+                      className="object-contain w-full h-full"
+                      onError={(e) => {
+                        console.error("Image failed to load:", e);
+                        e.currentTarget.src = "/placeholder.jpg";
+                      }}
+                    />
                   </div>
                 ) : (
                   <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-md text-muted-foreground">
-                    No image selected
+                    Belum ada gambar dipilih
                   </div>
                 )}
               </CardContent>
@@ -446,25 +457,20 @@ export default function EditPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Extracted Text</CardTitle>
+                <CardTitle>Teks Hasil Ekstraksi</CardTitle>
               </CardHeader>
               <CardContent>
-                {isLoading ? (
+                {isProcessing ? (
                   <div className="flex items-center justify-center h-32">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                ) : isProcessing ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <span className="ml-2">Processing image...</span>
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span className="ml-2">Memproses gambar...</span>
                   </div>
                 ) : (
                   <Textarea
                     value={extractedText}
                     onChange={(e) => setExtractedText(e.target.value)}
-                    placeholder="Extracted text will appear here"
-                    className="min-h-[120px]"
-                    disabled={!selectedImageId}
+                    placeholder="Teks yang diekstrak akan muncul di sini"
+                    className="min-h-[200px]"
                   />
                 )}
               </CardContent>
