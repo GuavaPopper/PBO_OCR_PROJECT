@@ -76,7 +76,7 @@ source venv/bin/activate
 
 2. Jalankan server development:
 ```bash
-pnpm dev
+pnpm run dev
 ```
 
 3. Buka browser dan akses `http://localhost:3000`

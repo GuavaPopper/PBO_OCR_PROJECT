@@ -6,13 +6,20 @@ from PIL import Image
 import pytesseract
 import io
 
-def process_image(image_data, language="eng"):
+# Configure Tesseract to use custom tessdata directory
+TESSDATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'tessdata')
+if not os.path.exists(TESSDATA_DIR):
+    os.makedirs(TESSDATA_DIR)
+pytesseract.pytesseract.tesseract_cmd = r'tesseract'  # Make sure this points to your tesseract executable
+os.environ['TESSDATA_PREFIX'] = TESSDATA_DIR
+
+def process_image(image_data, language="eng+ind"):
     """
     Process an image using OCR to extract text
     
     Args:
         image_data: Base64 encoded image data
-        language: Language code for OCR (default: eng)
+        language: Language code for OCR (default: eng+ind for English and Indonesian)
         
     Returns:
         dict: Dictionary containing the extracted text
@@ -24,12 +31,20 @@ def process_image(image_data, language="eng"):
         # Open the image using PIL
         image = Image.open(io.BytesIO(image_bytes))
         
+        # Configure OCR options for better accuracy
+        custom_config = r'--oem 1 --psm 3'
+        
         # Use pytesseract to extract text with specified language
-        extracted_text = pytesseract.image_to_string(image, lang=language)
+        extracted_text = pytesseract.image_to_string(
+            image, 
+            lang=language,
+            config=custom_config
+        )
         
         return {
             "success": True,
-            "text": extracted_text
+            "text": extracted_text.strip(),
+            "language": language
         }
     except Exception as e:
         return {
@@ -45,7 +60,7 @@ if __name__ == "__main__":
         # Parse the JSON input
         data = json.loads(input_data)
         image_data = data.get("image")
-        language = data.get("language", "eng")
+        language = data.get("language", "eng+ind")  # Default to both English and Indonesian
         
         if not image_data:
             result = {
