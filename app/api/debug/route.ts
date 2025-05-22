@@ -1,7 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getImages } from "@/lib/db"
+import { supabase } from "@/lib/supabase"
 import { spawn } from "child_process"
 import path from "path"
+
+// Helper function to get images from Supabase
+async function getImages() {
+  const { data, error } = await supabase
+    .from('images')
+    .select('*')
+    .order('created_at', { ascending: false })
+  
+  if (error) throw error
+  return data || []
+}
 
 // GET /api/debug - Get diagnostic information
 export async function GET(request: NextRequest) {
@@ -11,11 +22,8 @@ export async function GET(request: NextRequest) {
     
     // Check environment variables
     const env = {
-      MYSQL_HOST: process.env.MYSQL_HOST || 'not set',
-      MYSQL_USER: process.env.MYSQL_USER || 'not set',
-      MYSQL_DATABASE: process.env.MYSQL_DATABASE || 'not set',
-      // Don't expose password
-      MYSQL_PASSWORD_SET: process.env.MYSQL_PASSWORD ? 'true' : 'false',
+      SUPABASE_URL: process.env.SUPABASE_URL ? 'set' : 'not set',
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? 'set' : 'not set',
     }
     
     // Run a direct Python check

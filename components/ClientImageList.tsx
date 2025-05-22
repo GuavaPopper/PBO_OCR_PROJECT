@@ -37,11 +37,11 @@ export default function ClientImageList({ initialImages }: { initialImages: any[
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        // First try direct MySQL endpoint
-        const response = await fetch('/api/mysql');
+        // First try direct Supabase endpoint
+        const response = await fetch('/api/supabase');
         if (response.ok) {
           const data = await response.json();
-          console.log("[Client] Fetched fresh images from direct MySQL:", Array.isArray(data) ? data.length : 'not array');
+          console.log("[Client] Fetched fresh images from direct Supabase:", Array.isArray(data) ? data.length : 'not array');
           if (Array.isArray(data) && data.length > 0) {
             setImages(data);
             return;

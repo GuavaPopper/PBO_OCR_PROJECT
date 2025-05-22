@@ -93,20 +93,20 @@ export default function EditPage() {
       let response = await fetch(`/api/images/${id}`)
       console.log(`[Client] API response status: ${response.status}`)
       
-      // If that fails, try the direct MySQL API endpoint as fallback
+      // If that fails, try the direct Supabase API endpoint as fallback
       if (!response.ok) {
-        console.log("[Client] Regular API failed, trying MySQL direct endpoint")
-        const directResponse = await fetch(`/api/mysql`)
-        console.log(`[Client] MySQL API response status: ${directResponse.status}`)
+        console.log("[Client] Regular API failed, trying Supabase direct endpoint")
+        const directResponse = await fetch(`/api/supabase`)
+        console.log(`[Client] Supabase API response status: ${directResponse.status}`)
         
         if (directResponse.ok) {
           const allImages = await directResponse.json()
-          console.log(`[Client] MySQL returned ${Array.isArray(allImages) ? allImages.length : 'non-array'} images`)
+          console.log(`[Client] Supabase returned ${Array.isArray(allImages) ? allImages.length : 'non-array'} images`)
           
           if (Array.isArray(allImages)) {
             const foundImage = allImages.find(img => img.id.toString() === id)
             if (foundImage) {
-              console.log(`[Client] Found image in MySQL data: ${foundImage.name}`)
+              console.log(`[Client] Found image in Supabase data: ${foundImage.name}`)
               setImageName(foundImage.name)
               setImageLocation(foundImage.image_path)
               setImageDate(foundImage.created_at ? foundImage.created_at.split('T')[0] : '')
@@ -116,7 +116,7 @@ export default function EditPage() {
               setIsLoading(false)
               return
             } else {
-              console.log(`[Client] Image with ID ${id} not found in MySQL data`)
+              console.log(`[Client] Image with ID ${id} not found in Supabase data`)
             }
           }
         }
@@ -225,11 +225,11 @@ export default function EditPage() {
       setIsSubmitting(true)
       console.log("[Client] Submitting image update for ID:", selectedImageId)
 
-      // First try the direct MySQL API endpoint
+      // First try the direct Supabase API endpoint
       let success = false
       try {
-        console.log("[Client] Trying direct MySQL update")
-        const mysqlResponse = await fetch(`/api/mysql`, {
+        console.log("[Client] Trying direct Supabase update")
+        const supabaseResponse = await fetch(`/api/supabase`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -243,10 +243,10 @@ export default function EditPage() {
           }),
         })
 
-        console.log(`[Client] MySQL update response status: ${mysqlResponse.status}`)
+        console.log(`[Client] Supabase update response status: ${supabaseResponse.status}`)
         
-        if (mysqlResponse.ok) {
-          console.log("[Client] MySQL update successful")
+        if (supabaseResponse.ok) {
+          console.log("[Client] Supabase update successful")
           success = true
 
           // If we have a new image to upload, we need to handle that separately
@@ -280,14 +280,14 @@ export default function EditPage() {
             }
           }
         }
-      } catch (mysqlError) {
-        console.error("[Client] MySQL update error:", mysqlError)
-        // Continue to try the regular API if MySQL update fails
+      } catch (supabaseError) {
+        console.error("[Client] Supabase update error:", supabaseError)
+        // Continue to try the regular API if Supabase update fails
       }
 
-      // If MySQL update failed, try the regular API
+      // If Supabase update failed, try the regular API
       if (!success) {
-        console.log("[Client] MySQL update failed, trying regular API")
+        console.log("[Client] Supabase update failed, trying regular API")
         const response = await fetch(`/api/images/${selectedImageId}`, {
           method: "PUT",
           headers: {

@@ -59,14 +59,14 @@ export default function ClientImagePreview({ searchParams, images }: { searchPar
             return;
           }
           
-          // Try direct MySQL endpoint first
-          const directResponse = await fetch('/api/mysql');
+          // Try direct Supabase endpoint first
+          const directResponse = await fetch('/api/supabase');
           if (directResponse.ok) {
             const allImages = await directResponse.json();
             if (Array.isArray(allImages)) {
               const foundImage = allImages.find((img: any) => img.id.toString() === selectedId);
               if (foundImage) {
-                console.log("[Client] Found image from direct MySQL:", selectedId);
+                console.log("[Client] Found image from direct Supabase:", selectedId);
                 setSelectedImage(foundImage);
                 return;
               }

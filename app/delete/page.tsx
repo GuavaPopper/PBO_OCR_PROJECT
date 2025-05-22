@@ -92,25 +92,25 @@ export default function DeletePage() {
       let response = await fetch(`/api/images/${id}`)
       console.log(`[Client] API response status: ${response.status}`)
       
-      // If that fails, try the direct MySQL API endpoint as fallback
+      // If that fails, try the direct Supabase API endpoint as fallback
       if (!response.ok) {
-        console.log("[Client] Regular API failed, trying MySQL direct endpoint")
-        const directResponse = await fetch(`/api/mysql`)
-        console.log(`[Client] MySQL API response status: ${directResponse.status}`)
+        console.log("[Client] Regular API failed, trying Supabase direct endpoint")
+        const directResponse = await fetch(`/api/supabase`)
+        console.log(`[Client] Supabase API response status: ${directResponse.status}`)
         
         if (directResponse.ok) {
           const allImages = await directResponse.json()
-          console.log(`[Client] MySQL returned ${Array.isArray(allImages) ? allImages.length : 'non-array'} images`)
+          console.log(`[Client] Supabase returned ${Array.isArray(allImages) ? allImages.length : 'non-array'} images`)
           
           if (Array.isArray(allImages)) {
             const foundImage = allImages.find(img => img.id.toString() === id)
             if (foundImage) {
-              console.log(`[Client] Found image in MySQL data: ${foundImage.name}`)
+              console.log(`[Client] Found image in Supabase data: ${foundImage.name}`)
               setSelectedImage(foundImage)
               setIsLoading(false)
               return
             } else {
-              console.log(`[Client] Image with ID ${id} not found in MySQL data`)
+              console.log(`[Client] Image with ID ${id} not found in Supabase data`)
             }
           }
         }
@@ -179,28 +179,28 @@ export default function DeletePage() {
         console.error("[Client] Error using API delete:", apiError)
       }
 
-      // If API delete failed, try direct MySQL delete
+      // If API delete failed, try direct Supabase delete
       if (!success) {
-        console.log("[Client] Trying MySQL direct delete")
+        console.log("[Client] Trying Supabase direct delete")
         try {
-          const mysqlResponse = await fetch(`/api/mysql?id=${selectedImageId}`, {
+          const supabaseResponse = await fetch(`/api/supabase?id=${selectedImageId}`, {
             method: "DELETE",
           })
           
-          console.log(`[Client] MySQL delete response status: ${mysqlResponse.status}`)
+          console.log(`[Client] Supabase delete response status: ${supabaseResponse.status}`)
           
-          if (mysqlResponse.ok) {
-            console.log("[Client] Successfully deleted image via MySQL")
+          if (supabaseResponse.ok) {
+            console.log("[Client] Successfully deleted image via Supabase")
             success = true
           } else {
-            console.error("[Client] Failed to delete image via MySQL")
-            const errorData = await mysqlResponse.json()
-            console.error("[Client] MySQL delete error:", errorData)
+            console.error("[Client] Failed to delete image via Supabase")
+            const errorData = await supabaseResponse.json()
+            console.error("[Client] Supabase delete error:", errorData)
             throw new Error(errorData.error || "Failed to delete image")
           }
-        } catch (mysqlError) {
-          console.error("[Client] Error using MySQL delete:", mysqlError)
-          throw mysqlError
+        } catch (supabaseError) {
+          console.error("[Client] Error using Supabase delete:", supabaseError)
+          throw supabaseError
         }
       }
 

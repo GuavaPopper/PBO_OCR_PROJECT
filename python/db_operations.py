@@ -1,218 +1,134 @@
 import os
 import sys
 import json
-import mysql.connector
-from mysql.connector import Error
 import datetime
+import requests
+from dotenv import load_dotenv
 
-def get_db_connection():
-    """Create a database connection using environment variables"""
+# Load environment variables from .env.local
+load_dotenv('.env.local')
+
+# Supabase credentials
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.environ.get('SUPABASE_ANON_KEY')
+
+if not SUPABASE_URL or not SUPABASE_ANON_KEY:
+    print("Error: Missing Supabase credentials in environment variables", file=sys.stderr)
+    sys.exit(1)
+
+# Helper function for Supabase API requests
+def supabase_request(method, endpoint, data=None, params=None):
+    """Make a request to the Supabase API"""
+    url = f"{SUPABASE_URL}{endpoint}"
+    headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+    }
+    
     try:
-        connection = mysql.connector.connect(
-            host=os.environ.get('MYSQL_HOST', 'localhost'),
-            user=os.environ.get('MYSQL_USER', 'root'),
-            password=os.environ.get('MYSQL_PASSWORD', '123456'),
-            database=os.environ.get('MYSQL_DATABASE', 'ocr_app')
-        )
-        return connection
-    except Error as e:
-        print(f"Error connecting to MySQL: {e}")
-        return None
-
-# Function to convert datetime objects to strings
-def convert_to_serializable(obj):
-    """Convert MySQL row results to JSON serializable format"""
-    if isinstance(obj, dict):
-        for key, value in obj.items():
-            if isinstance(value, datetime.datetime):
-                obj[key] = value.isoformat()
-            elif isinstance(value, dict):
-                obj[key] = convert_to_serializable(value)
-    elif isinstance(obj, list):
-        for i, item in enumerate(obj):
-            obj[i] = convert_to_serializable(item)
-    return obj
+        if method == "GET":
+            response = requests.get(url, headers=headers, params=params)
+        elif method == "POST":
+            response = requests.post(url, headers=headers, json=data)
+        elif method == "PUT":
+            response = requests.put(url, headers=headers, json=data)
+        elif method == "DELETE":
+            response = requests.delete(url, headers=headers, params=params)
+        else:
+            return {"success": False, "error": f"Unsupported method: {method}"}
+        
+        response.raise_for_status()
+        return {"success": True, "data": response.json()}
+    except requests.exceptions.RequestException as e:
+        return {"success": False, "error": str(e)}
 
 def initialize_database():
-    """Initialize the database with required tables"""
-    try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"success": False, "error": "Failed to connect to database"}
-        
-        cursor = connection.cursor()
-        
-        # Create images table if it doesn't exist
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS images (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                image_path VARCHAR(255) NOT NULL,
-                extracted_text TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-            )
-        ''')
-        
-        connection.commit()
-        cursor.close()
-        connection.close()
-        
-        return {"success": True, "message": "Database initialized successfully"}
-    except Error as e:
-        return {"success": False, "error": str(e)}
+    """Initialize the database - not needed with Supabase as we've created the table via migration"""
+    return {"success": True, "message": "Database initialized successfully"}
 
 def get_images(search=None):
     """Get all images with optional search filter"""
-    try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"success": False, "error": "Failed to connect to database"}
-        
-        cursor = connection.cursor(dictionary=True)
-        
-        if search:
-            query = "SELECT * FROM images WHERE name LIKE %s OR extracted_text LIKE %s ORDER BY created_at DESC"
-            params = (f"%{search}%", f"%{search}%")
-            cursor.execute(query, params)
-        else:
-            query = "SELECT * FROM images ORDER BY created_at DESC"
-            cursor.execute(query)
-        
-        images = cursor.fetchall()
-        
-        cursor.close()
-        connection.close()
-        
-        # Convert datetime objects to strings
-        serializable_images = convert_to_serializable(images)
-        
-        # Add a debug log to stderr - this won't interfere with the JSON output
-        print(f"DEBUG: Returning {len(serializable_images)} images", file=sys.stderr)
-        
-        return {"success": True, "data": serializable_images}
-    except Error as e:
-        return {"success": False, "error": str(e)}
+    endpoint = "/rest/v1/images"
+    params = {"select": "*", "order": "created_at.desc"}
+    
+    if search:
+        # PostgreSQL ILIKE for case-insensitive search
+        params["or"] = f"name.ilike.*{search}*,extracted_text.ilike.*{search}*"
+    
+    result = supabase_request("GET", endpoint, params=params)
+    
+    # Add a debug log to stderr - this won't interfere with the JSON output
+    if result["success"]:
+        print(f"DEBUG: Returning {len(result['data'])} images", file=sys.stderr)
+    
+    return result
 
 def get_image_by_id(id):
     """Get a single image by ID"""
-    try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"success": False, "error": "Failed to connect to database"}
-        
-        cursor = connection.cursor(dictionary=True)
-        
-        query = "SELECT * FROM images WHERE id = %s"
-        cursor.execute(query, (id,))
-        
-        image = cursor.fetchone()
-        
-        cursor.close()
-        connection.close()
-        
-        if image:
-            # Convert datetime objects to strings
-            serializable_image = convert_to_serializable(image)
-            return {"success": True, "data": serializable_image}
-        else:
+    endpoint = f"/rest/v1/images"
+    params = {"id": f"eq.{id}", "select": "*"}
+    
+    result = supabase_request("GET", endpoint, params=params)
+    
+    if result["success"]:
+        if not result["data"] or len(result["data"]) == 0:
             return {"success": False, "error": "Image not found"}
-    except Error as e:
-        return {"success": False, "error": str(e)}
+        # Return the first item
+        return {"success": True, "data": result["data"][0]}
+    return result
 
 def add_image(name, image_path, extracted_text):
     """Add a new image"""
-    try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"success": False, "error": "Failed to connect to database"}
-        
-        cursor = connection.cursor()
-        
-        query = "INSERT INTO images (name, image_path, extracted_text) VALUES (%s, %s, %s)"
-        cursor.execute(query, (name, image_path, extracted_text))
-        
-        connection.commit()
-        
-        # Get the ID of the inserted row
-        insert_id = cursor.lastrowid
-        
-        cursor.close()
-        connection.close()
-        
-        return {"success": True, "id": insert_id}
-    except Error as e:
-        return {"success": False, "error": str(e)}
+    endpoint = "/rest/v1/images"
+    data = {
+        "name": name,
+        "image_path": image_path,
+        "extracted_text": extracted_text
+    }
+    
+    result = supabase_request("POST", endpoint, data=data)
+    
+    if result["success"] and result["data"] and len(result["data"]) > 0:
+        return {"success": True, "id": result["data"][0]["id"]}
+    return result
 
 def update_image(id, name, image_path=None, extracted_text=None):
     """Update an existing image"""
-    try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"success": False, "error": "Failed to connect to database"}
-        
-        cursor = connection.cursor()
-        
-        # Check if the image exists
-        cursor.execute("SELECT id FROM images WHERE id = %s", (id,))
-        if not cursor.fetchone():
-            cursor.close()
-            connection.close()
+    endpoint = f"/rest/v1/images"
+    params = {"id": f"eq.{id}"}
+    
+    # Build the data dictionary based on provided parameters
+    data = {"name": name}
+    
+    if image_path:
+        data["image_path"] = image_path
+    
+    if extracted_text:
+        data["extracted_text"] = extracted_text
+    
+    # Add the updated_at timestamp
+    data["updated_at"] = datetime.datetime.utcnow().isoformat()
+    
+    result = supabase_request("PUT", endpoint, data=data, params=params)
+    
+    if result["success"]:
+        if not result["data"] or len(result["data"]) == 0:
             return {"success": False, "error": "Image not found"}
-        
-        # Build the update query based on provided parameters
-        query = "UPDATE images SET name = %s"
-        params = [name]
-        
-        if image_path:
-            query += ", image_path = %s"
-            params.append(image_path)
-        
-        if extracted_text:
-            query += ", extracted_text = %s"
-            params.append(extracted_text)
-        
-        query += " WHERE id = %s"
-        params.append(id)
-        
-        cursor.execute(query, tuple(params))
-        
-        connection.commit()
-        
-        cursor.close()
-        connection.close()
-        
         return {"success": True}
-    except Error as e:
-        return {"success": False, "error": str(e)}
+    return result
 
 def delete_image(id):
     """Delete an image"""
-    try:
-        connection = get_db_connection()
-        if connection is None:
-            return {"success": False, "error": "Failed to connect to database"}
-        
-        cursor = connection.cursor()
-        
-        # Check if the image exists
-        cursor.execute("SELECT id FROM images WHERE id = %s", (id,))
-        if not cursor.fetchone():
-            cursor.close()
-            connection.close()
-            return {"success": False, "error": "Image not found"}
-        
-        query = "DELETE FROM images WHERE id = %s"
-        cursor.execute(query, (id,))
-        
-        connection.commit()
-        
-        cursor.close()
-        connection.close()
-        
+    endpoint = f"/rest/v1/images"
+    params = {"id": f"eq.{id}"}
+    
+    result = supabase_request("DELETE", endpoint, params=params)
+    
+    if result["success"]:
         return {"success": True}
-    except Error as e:
-        return {"success": False, "error": str(e)}
+    return result
 
 if __name__ == "__main__":
     # Read input from stdin
@@ -248,24 +164,10 @@ if __name__ == "__main__":
             id = data.get("id")
             result = delete_image(id)
         else:
-            result = {"success": False, "error": "Invalid operation"}
+            result = {"success": False, "error": f"Unknown operation: {operation}"}
         
-        # Ensure all results are JSON serializable
-        result = convert_to_serializable(result)
+        # Print the result as JSON
+        print(json.dumps(result))
         
-        # Debug the result before sending
-        print(f"DEBUG: Result type: {type(result)}", file=sys.stderr)
-        print(f"DEBUG: Result keys: {result.keys() if isinstance(result, dict) else 'not a dict'}", file=sys.stderr)
-        if isinstance(result, dict) and 'data' in result:
-            print(f"DEBUG: Data type: {type(result['data'])}", file=sys.stderr)
-            print(f"DEBUG: Data length: {len(result['data']) if hasattr(result['data'], '__len__') else 'no length'}", file=sys.stderr)
-        
-        # Output the result as JSON
-        json_result = json.dumps(result)
-        print(json_result)
     except Exception as e:
-        print(f"DEBUG: Exception in main: {str(e)}", file=sys.stderr)
-        print(json.dumps({
-            "success": False,
-            "error": str(e)
-        }))
+        print(json.dumps({"success": False, "error": str(e)})) 
